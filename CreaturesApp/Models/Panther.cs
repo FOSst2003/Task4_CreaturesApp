@@ -7,6 +7,7 @@ public class Panther : LivingCreature
     private const double Acceleration = 5;
 
     public event EventHandler Roar;
+    public event EventHandler ClimbedOnTree;
 
     public override void Move()
     {
@@ -20,11 +21,16 @@ public class Panther : LivingCreature
 
     public void ClimbTree()
     {
-        // Реализация лазания по дереву
+        OnClimbedOnTree(); 
     }
 
     public void MakeSound()
     {
         Roar?.Invoke(this, EventArgs.Empty);
+    }
+
+    protected virtual void OnClimbedOnTree()
+    {
+        ClimbedOnTree?.Invoke(this, EventArgs.Empty);
     }
 }

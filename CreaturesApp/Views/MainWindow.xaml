@@ -1,0 +1,85 @@
+﻿<Window x:Class="CreaturesApp.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Живые Существа" Height="500" Width="900">
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="MinWidth" Value="100"/>
+        </Style>
+
+        <Style TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,2"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <GroupBox Grid.Row="0" Header="Пантера">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="Двигаться" Command="{Binding MoveCommand}" CommandParameter="{Binding Panther}"/>
+                <Button Content="Остановиться" Command="{Binding StopCommand}" CommandParameter="{Binding Panther}"/>
+                <Button Content="Рычать" Command="{Binding MakeSoundCommand}" CommandParameter="{Binding Panther}"/>
+                <Button Content="На дерево" Command="{Binding ClimbTreeCommand}" CommandParameter="{Binding Panther}"/>
+            </StackPanel>
+        </GroupBox>
+
+        <GroupBox Grid.Row="1" Header="Собака">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="Двигаться" Command="{Binding MoveCommand}" CommandParameter="{Binding Dog}"/>
+                <Button Content="Остановиться" Command="{Binding StopCommand}" CommandParameter="{Binding Dog}"/>
+                <Button Content="Лаять" Command="{Binding MakeSoundCommand}" CommandParameter="{Binding Dog}"/>
+            </StackPanel>
+        </GroupBox>
+
+        <GroupBox Grid.Row="2" Header="Черепаха">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="Двигаться" Command="{Binding MoveCommand}" CommandParameter="{Binding Turtle}"/>
+                <Button Content="Остановиться" Command="{Binding StopCommand}" CommandParameter="{Binding Turtle}"/>
+            </StackPanel>
+        </GroupBox>
+
+        <GroupBox Grid.Row="3" Header="Статус">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Margin="0,10">
+                    <TextBlock Text="{Binding Panther.Speed, StringFormat=Скорость пантеры: {0} км/ч}"/>
+                    <TextBlock Text="{Binding Dog.Speed, StringFormat=Скорость собаки: {0} км/ч}"/>
+                    <TextBlock Text="{Binding Turtle.Speed, StringFormat=Скорость черепахи: {0} км/ч}"/>
+                    <TextBlock Text="{Binding SoundText, StringFormat=Последний звук: {0}}" FontWeight="Bold"/>
+                </StackPanel>
+
+                <Button Grid.Column="1"
+                        Content="Очистить лог"
+                        Command="{Binding ClearLogCommand}"
+                        VerticalAlignment="Top"
+                        HorizontalAlignment="Right"
+                        Background="#FFDDDDDD"
+                        BorderBrush="#888"
+                        BorderThickness="1"
+                        Padding="5" Margin="0,71,0,0"/>
+            </Grid>
+        </GroupBox>
+
+        <GroupBox Grid.Row="4" Header="Лог действий">
+            <ScrollViewer>
+                <TextBlock Text="{Binding ActionLog}" TextWrapping="Wrap"/>
+            </ScrollViewer>
+        </GroupBox>
+    </Grid>
+</Window>

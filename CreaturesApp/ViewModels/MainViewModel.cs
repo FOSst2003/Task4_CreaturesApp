@@ -1,109 +1,181 @@
 ﻿// ViewModels/MainViewModel.cs
+using System;
 using System.ComponentModel;
 using System.Windows.Input;
 
-public class MainViewModel : INotifyPropertyChanged
+
+namespace CreaturesApp.ViewModels
 {
-    private Panther panther;
-    private Dog dog;
-    private Turtle turtle;
-    private string soundText;
-
-    public Panther Panther
+    public class MainViewModel : INotifyPropertyChanged
     {
-        get { return panther; }
-        set
+        private Panther _panther;
+        private Dog _dog;
+        private Turtle _turtle;
+        private string _soundText;
+        private string _actionLog;
+
+        public Panther Panther
         {
-            panther = value;
-            OnPropertyChanged();
+            get => _panther;
+            set
+            {
+                _panther = value;
+                OnPropertyChanged();
+            }
         }
-    }
 
-    public Dog Dog
-    {
-        get { return dog; }
-        set
+        public Dog Dog
         {
-            dog = value;
-            OnPropertyChanged();
+            get => _dog;
+            set
+            {
+                _dog = value;
+                OnPropertyChanged();
+            }
         }
-    }
 
-    public Turtle Turtle
-    {
-        get { return turtle; }
-        set
+        public Turtle Turtle
         {
-            turtle = value;
-            OnPropertyChanged();
+            get => _turtle;
+            set
+            {
+                _turtle = value;
+                OnPropertyChanged();
+            }
         }
-    }
 
-    public string SoundText
-    {
-        get { return soundText; }
-        set
+        public string SoundText
         {
-            soundText = value;
-            OnPropertyChanged();
+            get => _soundText;
+            set
+            {
+                _soundText = value;
+                OnPropertyChanged();
+            }
         }
-    }
 
-    public ICommand MoveCommand { get; }
-    public ICommand StopCommand { get; }
-    public ICommand MakeSoundCommand { get; }
-    public ICommand ClimbTreeCommand { get; }
+        public string ActionLog
+        {
+            get => _actionLog;
+            set
+            {
+                _actionLog = value;
+                OnPropertyChanged();
+            }
+        }
 
-    public MainViewModel()
-    {
-        Panther = new Panther();
-        Dog = new Dog();
-        Turtle = new Turtle();
+        public ICommand MoveCommand { get; private set; }
+        public ICommand StopCommand { get; private set; }
+        public ICommand MakeSoundCommand { get; private set; }
+        public ICommand ClimbTreeCommand { get; private set; }
+        public ICommand ClearLogCommand { get; private set; }
 
-        MoveCommand = new RelayCommand(ExecuteMove);
-        StopCommand = new RelayCommand(ExecuteStop);
-        MakeSoundCommand = new RelayCommand(ExecuteMakeSound);
-        ClimbTreeCommand = new RelayCommand(ExecuteClimbTree, CanExecuteClimbTree);
+        public MainViewModel()
+        {
+            Panther = new Panther();
+            Dog = new Dog();
+            Turtle = new Turtle();
+            ActionLog = string.Empty;
 
-        Panther.Roar += (sender, e) => SoundText = "Рррр!";
-        Dog.Bark += (sender, e) => SoundText = "Гав!";
-    }
+            InitializeCommands();
+            SubscribeToEvents();
+        }
 
-    private void ExecuteMove(object param)
-    {
-        if (param is LivingCreature creature)
-            creature.Move();
-    }
+        private void InitializeCommands()
+        {
+            MoveCommand = new RelayCommand(ExecuteMove);
+            StopCommand = new RelayCommand(ExecuteStop);
+            MakeSoundCommand = new RelayCommand(ExecuteMakeSound);
+            ClimbTreeCommand = new RelayCommand(ExecuteClimbTree, CanExecuteClimbTree);
+            ClearLogCommand = new RelayCommand(ExecuteClearLog);
+        }
 
-    private void ExecuteStop(object param)
-    {
-        if (param is LivingCreature creature)
-            creature.Stop();
-    }
+        private void SubscribeToEvents()
+        {
+            Panther.Roar += (sender, e) =>
+            {
+                SoundText = "Рррр!";
+                AddToLog("Пантера рычит: Рррр!");
+            };
 
-    private void ExecuteMakeSound(object param)
-    {
-        if (param is Panther panther)
-            panther.MakeSound();
-        else if (param is Dog dog)
-            dog.MakeSound();
-    }
+            Dog.Bark += (sender, e) =>
+            {
+                SoundText = "Гав!";
+                AddToLog("Собака лает: Гав!");
+            };
 
-    private void ExecuteClimbTree(object param)
-    {
-        if (param is Panther panther)
-            panther.ClimbTree();
-    }
+            Panther.ClimbedOnTree += (sender, e) =>
+            {
+                AddToLog("Пантера успешно взобралась на дерево!");
+            };
+        }
 
-    private bool CanExecuteClimbTree(object param)
-    {
-        return param is Panther;
-    }
+        private void ExecuteMove(object parameter)
+        {
+            if (parameter is LivingCreature creature)
+            {
+                creature.Move();
+                AddToLog($"{GetCreatureName(creature)} двигается (скорость: {creature.Speed} км/ч)");
+            }
+        }
 
-    public event PropertyChangedEventHandler PropertyChanged;
+        private void ExecuteStop(object parameter)
+        {
+            if (parameter is LivingCreature creature)
+            {
+                creature.Stop();
+                AddToLog($"{GetCreatureName(creature)} останавливается (скорость: {creature.Speed} км/ч)");
+            }
+        }
 
-    protected void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string name = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        private void ExecuteMakeSound(object parameter)
+        {
+            if (parameter is Panther panther)
+            {
+                panther.MakeSound();
+            }
+            else if (parameter is Dog dog)
+            {
+                dog.MakeSound();
+            }
+        }
+
+        private void ExecuteClimbTree(object parameter)
+        {
+            if (parameter is Panther panther)
+            {
+                panther.ClimbTree();
+            }
+        }
+
+        private bool CanExecuteClimbTree(object parameter)
+        {
+            return parameter is Panther;
+        }
+
+        private void ExecuteClearLog(object parameter)
+        {
+            ActionLog = string.Empty;
+        }
+
+        private void AddToLog(string message)
+        {
+            ActionLog += $"{DateTime.Now:T}: {message}\n";
+        }
+
+        private string GetCreatureName(LivingCreature creature)
+        {
+            if (creature is Panther) return "Пантера";
+            if (creature is Dog) return "Собака";
+            if (creature is Turtle) return "Черепаха";
+            return "Существо";
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

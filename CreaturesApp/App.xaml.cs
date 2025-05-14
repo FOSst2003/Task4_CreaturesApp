@@ -1,5 +1,5 @@
 ﻿// App.xaml.cs
-using CreaturesApp;
+using CreaturesApp.Views;
 using System.Windows;
 
 public partial class App : Application
