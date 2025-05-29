@@ -9,8 +9,8 @@
     <ProjectGuid>{FBCE0AF2-824C-4A0F-BE66-AAD3A844DBD8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Library</RootNamespace>
-    <AssemblyName>Library</AssemblyName>
+    <RootNamespace>CreaturesLibrary</RootNamespace>
+    <AssemblyName>CreaturesLibrary</AssemblyName>
     <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
