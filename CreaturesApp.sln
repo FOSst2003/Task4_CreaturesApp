@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35527.113 d17.12
+VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreaturesApp", "CreaturesApp\CreaturesApp.csproj", "{6EBD20A6-2BFA-4D11-8B7E-E23873173BE5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreaturesLibrary", "Library\CreaturesLibrary.csproj", "{FBCE0AF2-824C-4A0F-BE66-AAD3A844DBD8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{6EBD20A6-2BFA-4D11-8B7E-E23873173BE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6EBD20A6-2BFA-4D11-8B7E-E23873173BE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6EBD20A6-2BFA-4D11-8B7E-E23873173BE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBCE0AF2-824C-4A0F-BE66-AAD3A844DBD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBCE0AF2-824C-4A0F-BE66-AAD3A844DBD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBCE0AF2-824C-4A0F-BE66-AAD3A844DBD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBCE0AF2-824C-4A0F-BE66-AAD3A844DBD8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

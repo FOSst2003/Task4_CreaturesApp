@@ -1,31 +1,27 @@
-﻿// ViewModels/RelayCommand.cs
+﻿#nullable enable
 using System;
 using System.Windows.Input;
 
-public class RelayCommand : ICommand
+namespace CreaturesApp.ViewModels
 {
-    private readonly Action<object> execute;
-    private readonly Predicate<object> canExecute;
-
-    public RelayCommand(Action<object> execute, Predicate<object> canExecute = null)
+    public class RelayCommand : ICommand
     {
-        this.execute = execute ?? throw new ArgumentNullException(nameof(execute));
-        this.canExecute = canExecute;
-    }
+        private readonly Action<object?> _execute;
+        private readonly Predicate<object?>? _canExecute;
 
-    public bool CanExecute(object parameter)
-    {
-        return canExecute == null || canExecute(parameter);
-    }
+        public RelayCommand(Action<object?> execute, Predicate<object?>? canExecute = null)
+        {
+            _execute = execute ?? throw new ArgumentNullException(nameof(execute));
+            _canExecute = canExecute;
+        }
 
-    public void Execute(object parameter)
-    {
-        execute(parameter);
-    }
+        public bool CanExecute(object? parameter) => _canExecute == null || _canExecute(parameter);
+        public void Execute(object? parameter) => _execute(parameter);
 
-    public event EventHandler CanExecuteChanged
-    {
-        add { CommandManager.RequerySuggested += value; }
-        remove { CommandManager.RequerySuggested -= value; }
+        public event EventHandler? CanExecuteChanged
+        {
+            add => CommandManager.RequerySuggested += value;
+            remove => CommandManager.RequerySuggested -= value;
+        }
     }
 }

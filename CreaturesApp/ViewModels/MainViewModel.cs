@@ -1,181 +1,142 @@
-﻿// ViewModels/MainViewModel.cs
+﻿using Microsoft.Win32;
 using System;
-using System.ComponentModel;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Reflection;
 using System.Windows.Input;
-
+using CreaturesApp.Models;
+using CreaturesLibrary; // Теперь работает корректно
 
 namespace CreaturesApp.ViewModels
 {
-    public class MainViewModel : INotifyPropertyChanged
+    public class MainViewModel : ViewModelBase
     {
-        private Panther _panther;
-        private Dog _dog;
-        private Turtle _turtle;
-        private string _soundText;
-        private string _actionLog;
+        public ObservableCollection<string> ClassNames { get; } = new();
+        public ObservableCollection<MethodModel> Methods { get; } = new();
+        public ObservableCollection<ParameterModel> Parameters { get; } = new();
 
-        public Panther Panther
+        private string? _selectedClass;
+        public string SelectedClass
         {
-            get => _panther;
+            get => _selectedClass ?? string.Empty;
             set
             {
-                _panther = value;
+                _selectedClass = value;
                 OnPropertyChanged();
+                LoadMethodsForSelectedClass();
             }
         }
 
-        public Dog Dog
+        private MethodModel? _selectedMethod;
+        public MethodModel SelectedMethod
         {
-            get => _dog;
+            get => _selectedMethod;
             set
             {
-                _dog = value;
+                _selectedMethod = value;
                 OnPropertyChanged();
+                LoadParametersForSelectedMethod();
             }
         }
 
-        public Turtle Turtle
-        {
-            get => _turtle;
-            set
-            {
-                _turtle = value;
-                OnPropertyChanged();
-            }
-        }
+        public string DllPath { get; set; } = string.Empty;
+        private Assembly? loadedAssembly;
+        private Type? selectedType;
 
-        public string SoundText
-        {
-            get => _soundText;
-            set
-            {
-                _soundText = value;
-                OnPropertyChanged();
-            }
-        }
+        // Используем интерфейс из CreaturesLibrary
+        private Type interfaceType = typeof(ILivingCreature);
 
-        public string ActionLog
-        {
-            get => _actionLog;
-            set
-            {
-                _actionLog = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public ICommand MoveCommand { get; private set; }
-        public ICommand StopCommand { get; private set; }
-        public ICommand MakeSoundCommand { get; private set; }
-        public ICommand ClimbTreeCommand { get; private set; }
-        public ICommand ClearLogCommand { get; private set; }
+        public ICommand LoadDllCommand { get; }
+        public ICommand InvokeMethodCommand { get; }
 
         public MainViewModel()
         {
-            Panther = new Panther();
-            Dog = new Dog();
-            Turtle = new Turtle();
-            ActionLog = string.Empty;
-
-            InitializeCommands();
-            SubscribeToEvents();
+            LoadDllCommand = new RelayCommand(_ => LoadDll());
+            InvokeMethodCommand = new RelayCommand(_ => InvokeSelectedMethod());
         }
 
-        private void InitializeCommands()
+        private void LoadDll()
         {
-            MoveCommand = new RelayCommand(ExecuteMove);
-            StopCommand = new RelayCommand(ExecuteStop);
-            MakeSoundCommand = new RelayCommand(ExecuteMakeSound);
-            ClimbTreeCommand = new RelayCommand(ExecuteClimbTree, CanExecuteClimbTree);
-            ClearLogCommand = new RelayCommand(ExecuteClearLog);
-        }
-
-        private void SubscribeToEvents()
-        {
-            Panther.Roar += (sender, e) =>
+            try
             {
-                SoundText = "Рррр!";
-                AddToLog("Пантера рычит: Рррр!");
-            };
+                OpenFileDialog ofd = new OpenFileDialog { Filter = "DLL files (*.dll)|*.dll" };
+                if (ofd.ShowDialog() == true)
+                {
+                    DllPath = ofd.FileName;
+                    loadedAssembly = Assembly.LoadFrom(DllPath);
 
-            Dog.Bark += (sender, e) =>
-            {
-                SoundText = "Гав!";
-                AddToLog("Собака лает: Гав!");
-            };
+                    var types = loadedAssembly.GetTypes()
+                        .Where(t => interfaceType.IsAssignableFrom(t) && !t.IsAbstract)
+                        .ToList();
 
-            Panther.ClimbedOnTree += (sender, e) =>
+                    ClassNames.Clear();
+                    foreach (var type in types)
+                        ClassNames.Add(type.FullName);
+                }
+            }
+            catch (Exception ex)
             {
-                AddToLog("Пантера успешно взобралась на дерево!");
-            };
-        }
-
-        private void ExecuteMove(object parameter)
-        {
-            if (parameter is LivingCreature creature)
-            {
-                creature.Move();
-                AddToLog($"{GetCreatureName(creature)} двигается (скорость: {creature.Speed} км/ч)");
+                System.Windows.MessageBox.Show($"Ошибка загрузки DLL: {ex.Message}");
             }
         }
 
-        private void ExecuteStop(object parameter)
+        private void LoadMethodsForSelectedClass()
         {
-            if (parameter is LivingCreature creature)
+            Parameters.Clear();
+            if (loadedAssembly == null || string.IsNullOrEmpty(SelectedClass))
+                return;
+
+            selectedType = loadedAssembly.GetType(SelectedClass);
+            if (selectedType == null)
             {
-                creature.Stop();
-                AddToLog($"{GetCreatureName(creature)} останавливается (скорость: {creature.Speed} км/ч)");
+                System.Windows.MessageBox.Show("Не удалось найти тип");
+                return;
+            }
+
+            Methods.Clear();
+            foreach (var method in selectedType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+            {
+                if (!method.IsSpecialName)
+                    Methods.Add(new MethodModel { Name = method.Name, MethodInfo = method });
             }
         }
 
-        private void ExecuteMakeSound(object parameter)
+        private void LoadParametersForSelectedMethod()
         {
-            if (parameter is Panther panther)
-            {
-                panther.MakeSound();
-            }
-            else if (parameter is Dog dog)
-            {
-                dog.MakeSound();
-            }
-        }
+            Parameters.Clear();
+            if (SelectedMethod?.MethodInfo == null)
+                return;
 
-        private void ExecuteClimbTree(object parameter)
-        {
-            if (parameter is Panther panther)
+            foreach (var param in SelectedMethod.MethodInfo.GetParameters())
             {
-                panther.ClimbTree();
+                Parameters.Add(new ParameterModel
+                {
+                    Name = param.Name,
+                    Type = param.ParameterType,
+                    Value = string.Empty
+                });
             }
         }
 
-        private bool CanExecuteClimbTree(object parameter)
+        private void InvokeSelectedMethod()
         {
-            return parameter is Panther;
-        }
+            try
+            {
+                if (selectedType == null || SelectedMethod == null)
+                    return;
 
-        private void ExecuteClearLog(object parameter)
-        {
-            ActionLog = string.Empty;
-        }
+                var instance = Activator.CreateInstance(selectedType);
+                var parameterValues = Parameters.Select(p =>
+                    Convert.ChangeType(p.Value, p.Type!)).ToArray(); // Type не может быть null здесь
 
-        private void AddToLog(string message)
-        {
-            ActionLog += $"{DateTime.Now:T}: {message}\n";
-        }
-
-        private string GetCreatureName(LivingCreature creature)
-        {
-            if (creature is Panther) return "Пантера";
-            if (creature is Dog) return "Собака";
-            if (creature is Turtle) return "Черепаха";
-            return "Существо";
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                var result = SelectedMethod.MethodInfo.Invoke(instance, parameterValues);
+                System.Windows.MessageBox.Show(
+                    result != null ? result.ToString() : "Метод выполнен успешно.");
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Ошибка вызова метода: {ex.Message}\n{ex.StackTrace}");
+            }
         }
     }
 }

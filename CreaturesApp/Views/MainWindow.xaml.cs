@@ -6,8 +6,7 @@ namespace CreaturesApp.Views
     {
         public MainWindow()
         {
-            InitializeComponent(); // Теперь компилятор сгенерирует этот метод
-            DataContext = new ViewModels.MainViewModel();
+            InitializeComponent();
         }
     }
 }

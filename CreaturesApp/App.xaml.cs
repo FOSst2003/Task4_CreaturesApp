@@ -1,13 +1,16 @@
-﻿// App.xaml.cs
-using CreaturesApp.Views;
-using System.Windows;
+﻿using System.Windows;
 
-public partial class App : Application
+namespace CreaturesApp
 {
-    protected override void OnStartup(StartupEventArgs e)
+    public partial class App : Application
     {
-        base.OnStartup(e);
-        MainWindow window = new MainWindow();
-        window.Show();
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+
+            var window = new Views.MainWindow();
+            window.DataContext = new ViewModels.MainViewModel();
+            window.Show();
+        }
     }
 }
