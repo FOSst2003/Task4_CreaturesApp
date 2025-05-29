@@ -7,7 +7,9 @@ namespace CreaturesLibrary
         private const double MaxSpeed = 30;
         private const double Acceleration = 3;
 
-        public event EventHandler Bark;
+        public event EventHandler? Bark;
+
+        public override string Name => "Dog";
 
         public override void Move()
         {
@@ -19,9 +21,14 @@ namespace CreaturesLibrary
             Speed = Math.Max(Speed - Acceleration, 0);
         }
 
-        public void MakeSound()
+        public override void Speak()
         {
             Bark?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void MakeSound()
+        {
+            Speak();
         }
     }
 }

@@ -7,38 +7,47 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+        <!-- Панель загрузки сборки -->
         <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
             <Button Content="Загрузить DLL" Width="120" Command="{Binding LoadDllCommand}" />
             <TextBlock Text="{Binding DllPath}" Margin="10,0,0,0" VerticalAlignment="Center" />
         </StackPanel>
+        <!-- Основной контент -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="3*"/>
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
-            <ListBox ItemsSource="{Binding ClassNames}"
-                     SelectedItem="{Binding SelectedClass}" 
-                     Margin="0,0,5,0"/>
-            <ListBox Grid.Column="1"
-                     ItemsSource="{Binding Methods}"
-                     DisplayMemberPath="Name"
-                     SelectedItem="{Binding SelectedMethod}" 
-                     Margin="0,0,5,0"/>
+            <!-- Список классов -->
+            <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                <TextBlock Text="Классы" FontWeight="Bold" Margin="0,0,0,5"/>
+                <ListBox ItemsSource="{Binding ClassNames}"
+                         SelectedItem="{Binding SelectedClass}" />
+            </StackPanel>
+            <!-- Список методов -->
+            <StackPanel Grid.Column="1" Margin="0,0,5,0">
+                <TextBlock Text="Методы" FontWeight="Bold" Margin="0,0,0,5"/>
+                <ListBox ItemsSource="{Binding Methods}"
+                         DisplayMemberPath="Name"
+                         SelectedItem="{Binding SelectedMethod}" />
+            </StackPanel>
+            <!-- Параметры и исполнение -->
             <StackPanel Grid.Column="2">
+                <TextBlock Text="Параметры" FontWeight="Bold" Margin="0,0,0,5"/>
                 <ItemsControl ItemsSource="{Binding Parameters}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" Margin="0,2">
-                                <TextBlock Text="{Binding Name}" Width="100" />
-                                <TextBox Width="150" Text="{Binding Value}" />
+                                <TextBlock Text="{Binding Name}" Width="100" VerticalAlignment="Center"/>
+                                <TextBox Width="150" Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" />
                             </StackPanel>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
                 <Button Content="Выполнить" Margin="0,10,0,0"
                         Command="{Binding InvokeMethodCommand}" 
-                        HorizontalAlignment="Left" Width="100"/>
+                        HorizontalAlignment="Left" Width="100" />
             </StackPanel>
         </Grid>
     </Grid>
